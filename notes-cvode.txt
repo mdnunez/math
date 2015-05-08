@@ -1,0 +1,9 @@
+Installing CVODE:
+-----------------
+make install-cvode
+
+
+WINDOWS
+---------
+- if using Rtools, user must specify current directory using the
+  CURDIR variable to make
