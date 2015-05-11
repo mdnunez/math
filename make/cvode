@@ -4,7 +4,8 @@ CVODE_INSTDIR ?= bin/cvode-inst
 
 CVODE_CMAKE_FLAGS = -DMPI_ENABLE=OFF -DEXAMPLES_INSTALL=OFF -DEXAMPLES_ENABLE=OFF
 CVODE_CMAKE_FLAGS += CXX=$(CC) -DCXX_ENABLE=TRUE -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
-LDFLAGS += -L $(CVODE_INSTDIR)/lib -l sundials_cvode  -l sundials_nvecserial
+LDLIBS += -L $(CVODE_INSTDIR)/lib -l sundials_cvode  -l sundials_nvecserial
+CFLAGS += -isystem $(CVODE_INSTDIR)/include
 
 .PHONY: install-cvode
 install-cvode:
