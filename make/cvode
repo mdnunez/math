@@ -10,4 +10,4 @@ LDFLAGS += -L $(CVODE_INSTDIR)/lib -l sundials_cvode  -l sundials_nvecserial
 install-cvode:
 	@mkdir -p $(CVODE_BUILDDIR)
 	@mkdir -p $(CVODE_INSTDIR)
-	cd $(CVODE_BUILDDIR); cmake -G "Unix Makefiles" $(CVODE_CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX=$(CVODE_INSTDIR) $(CURDIR)/$(CVODE_SRCDIR); make; make install
+	cd $(CVODE_BUILDDIR); cmake -G "Unix Makefiles" $(CVODE_CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX=$(CURDIR)/$(CVODE_INSTDIR) $(CURDIR)/$(CVODE_SRCDIR); make; make install
