@@ -1,0 +1,14 @@
+CVODE_SRCDIR ?= lib/cvode-2.8.1
+CVODE_BUILDDIR ?= bin/cvode-build
+CVODE_INSTDIR ?= bin/cvode-inst
+
+CVODE_CMAKE_FLAGS = -DMPI_ENABLE=OFF -DEXAMPLES_INSTALL=OFF -DEXAMPLES_ENABLE=OFF
+CVODE_CMAKE_FLAGS += CXX=$(CC) -DCXX_ENABLE=TRUE -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF
+LDLIBS += -L $(CVODE_INSTDIR)/lib -l sundials_cvode  -l sundials_nvecserial
+CFLAGS += -isystem $(CVODE_INSTDIR)/include
+
+.PHONY: install-cvode
+install-cvode:
+	@mkdir -p $(CVODE_BUILDDIR)
+	@mkdir -p $(CVODE_INSTDIR)
+	cd $(CVODE_BUILDDIR); cmake -G "Unix Makefiles" $(CVODE_CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX=$(CURDIR)/$(CVODE_INSTDIR) $(CURDIR)/$(CVODE_SRCDIR); make; make install

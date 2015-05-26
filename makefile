@@ -65,6 +65,7 @@ include make/tests    # tests
 include make/doxygen  # doxygen
 include make/manual   # manual: manual, doc/stan-reference.pdf
 include make/cpplint  # cpplint
+include make/cvode    # cvode for ode integrator
 
 ##
 # Dependencies
