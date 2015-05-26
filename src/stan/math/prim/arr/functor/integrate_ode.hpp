@@ -9,6 +9,7 @@
 #include <stan/math/prim/scal/meta/return_type.hpp>
 #include <stan/math/prim/arr/functor/coupled_ode_system.hpp>
 #include <stan/math/prim/arr/functor/coupled_ode_observer.hpp>
+#include <stan/math/prim/arr/functor/CVodeIntegrator.h>
 #include <boost/numeric/odeint.hpp>
 #include <ostream>
 #include <vector>
@@ -16,6 +17,49 @@
 namespace stan {
 
   namespace math {
+
+		template <typename F, typename T1, typename T2>
+		class CVodeODE : public CVodeIntegrator::Ode {
+			public:
+					CVodeODE(const F& f,
+                         const std::vector<T1> & y0,
+                         const std::vector<T2> & theta,
+                         const std::vector<double> & x,
+                         const std::vector<int> & x_int,
+                         std::ostream* msgs) : cos(f, y0, theta, x, x_int, msgs) {
+
+						y_t.resize( cos.size() );
+						dy_dt.resize( cos.size() );
+					}
+
+				public:
+					int numberOfEquations() const { return cos.size(); }
+					int rhs(const double & t, double y[], double ydot[]) {
+						cos(y, ydot, t);
+						return 0;
+					}
+
+					bool hasJacobian() const { return cos.hasJacobian(); }
+					int jacobian(const double t, const double y[], double *J[]) {
+						cos.jacobian(y, J, t);
+						return 0;
+					}
+
+				public:
+					inline std::vector<double> initial_state() {
+						return cos.initial_state();
+					}
+
+					inline std::vector<std::vector<typename stan::return_type<T1,T2>::type> >
+					decouple_states(const std::vector<std::vector<double> >& y) {
+						return cos.decouple_states(y);
+					}
+
+				private:
+					coupled_ode_system<F, T1, T2> cos;
+					std::vector<double> y_t, dy_dt;
+		};
+
 
     /**
      * Return the solutions for the specified system of ordinary
@@ -78,43 +122,26 @@ namespace stan {
       stan::math::check_nonzero_size("integrate_ode", "times", ts);
       stan::math::check_nonzero_size("integrate_ode", "initial state", y0);
       stan::math::check_ordered("integrate_ode", "times", ts);
-      stan::math::check_less("integrate_ode", "initial time", t0, ts[0]);
+      //stan::math::check_less("integrate_ode", "initial time", t0, ts[0]);
 
-      const double absolute_tolerance = 1e-6;
-      const double relative_tolerance = 1e-6;
-      const double step_size = 0.1;
+      const double absolute_tolerance = 1e-12;
+      const double relative_tolerance = 1e-9;
+      CVodeODE<F, T1, T2> coupled_system(f, y0, theta, x, x_int, msgs);
 
-      // creates basic or coupled system by template specializations
-      coupled_ode_system<F, T1, T2>
-        coupled_system(f, y0, theta, x, x_int, msgs);
-
-      // first time in the vector must be time of initial state
-      std::vector<double> ts_vec(ts.size() + 1);
-      ts_vec[0] = t0;
-      for (size_t n = 0; n < ts.size(); n++)
-        ts_vec[n+1] = ts[n];
-
-      std::vector<std::vector<double> > y_coupled(ts_vec.size());
-      coupled_ode_observer observer(y_coupled);
+      std::vector<std::vector<double> > y_coupled(ts.size());
 
       // the coupled system creates the coupled initial state
-      std::vector<double> initial_coupled_state
-        = coupled_system.initial_state();
+      std::vector<double> initial_coupled_state = coupled_system.initial_state();
 
-      integrate_times(make_dense_output(absolute_tolerance,
-                                        relative_tolerance,
-                                        runge_kutta_dopri5<std::vector<double>,
-                                                           double,
-                                                           std::vector<double>,
-                                                           double>() ),
-                      coupled_system,
-                      initial_coupled_state,
-                      boost::begin(ts_vec), boost::end(ts_vec),
-                      step_size,
-                      observer);
+			CVodeIntegrator integrator;
+			integrator.assignOde(coupled_system, t0, initial_coupled_state);
+			integrator.setRelativeTolerance(relative_tolerance);
+			integrator.setAbsoluteTolerance(absolute_tolerance);
 
-      // remove the first state corresponding to the initial value
-      y_coupled.erase(y_coupled.begin());
+      for (size_t n = 0; n < ts.size(); n++) {
+				integrator.integrateTo( ts[n] );
+				y_coupled[n] = integrator.currentState();
+			}
 
       // the coupled system also encapsulates the decoupling operation
       return coupled_system.decouple_states(y_coupled);
