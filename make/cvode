@@ -11,4 +11,4 @@ CFLAGS += -isystem $(CVODE_INSTDIR)/include
 install-cvode:
 	@mkdir -p $(CVODE_BUILDDIR)
 	@mkdir -p $(CVODE_INSTDIR)
-	cd $(CVODE_BUILDDIR); cmake -G "Unix Makefiles" $(CVODE_CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX=$(CURDIR)/$(CVODE_INSTDIR) $(CURDIR)/$(CVODE_SRCDIR); make; make install
+	cd "$(CVODE_BUILDDIR)" && cmake -G "Unix Makefiles" $(CVODE_CMAKE_FLAGS) -DCMAKE_INSTALL_PREFIX="$(CURDIR)/$(CVODE_INSTDIR)" "$(CURDIR)/$(CVODE_SRCDIR)" && make && make install
