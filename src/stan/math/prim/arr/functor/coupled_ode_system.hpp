@@ -98,19 +98,19 @@ namespace stan {
                       double t) {
         dy_dt = f_(t, y, theta_dbl_, x_, x_int_, msgs_);
         stan::math::check_matching_sizes("coupled_ode_system",
-                                                   "y", y,
-                                                   "dy_dt", dy_dt);
+                                         "y", y,
+                                         "dy_dt", dy_dt);
       }
 
-			void operator()(const double y[], double dy_dy[], double t) {
-				std::vector<double> y_(&y[0], &y[N_]);
-				std::vector<double> dy_dt_;
-				(*this)(y_, dy_dt_, t);
-				std::copy(dy_dt_.begin(), dy_dt_.end(), &dy_dy[0]);
-			}
+      void operator()(const double y[], double dy_dy[], double t) {
+        std::vector<double> y_(&y[0], &y[N_]);
+        std::vector<double> dy_dt_;
+        (*this)(y_, dy_dt_, t);
+        std::copy(dy_dt_.begin(), dy_dt_.end(), &dy_dy[0]);
+      }
 
-			bool hasJacobian() const { return false; }
-			void jacobian(const double y[], double *J[], double t){}
+      bool hasJacobian() const { return false; }
+      void jacobian(const double y[], double *J[], double t){}
       
       /**
        * Returns the size of the coupled system.

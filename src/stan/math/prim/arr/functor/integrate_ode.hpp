@@ -18,47 +18,47 @@ namespace stan {
 
   namespace math {
 
-		template <typename F, typename T1, typename T2>
-		class CVodeODE : public CVodeIntegrator::Ode {
-			public:
-					CVodeODE(const F& f,
-                         const std::vector<T1> & y0,
-                         const std::vector<T2> & theta,
-                         const std::vector<double> & x,
-                         const std::vector<int> & x_int,
-                         std::ostream* msgs) : cos(f, y0, theta, x, x_int, msgs) {
+    template <typename F, typename T1, typename T2>
+    class CVodeODE : public CVodeIntegrator::Ode {
+    public:
+      CVodeODE(const F& f,
+               const std::vector<T1> & y0,
+               const std::vector<T2> & theta,
+               const std::vector<double> & x,
+               const std::vector<int> & x_int,
+               std::ostream* msgs) : cos(f, y0, theta, x, x_int, msgs) {
 
-						y_t.resize( cos.size() );
-						dy_dt.resize( cos.size() );
-					}
+        y_t.resize( cos.size() );
+        dy_dt.resize( cos.size() );
+      }
 
-				public:
-					int numberOfEquations() const { return cos.size(); }
-					int rhs(const double & t, double y[], double ydot[]) {
-						cos(y, ydot, t);
-						return 0;
-					}
+    public:
+      int numberOfEquations() const { return cos.size(); }
+      int rhs(const double & t, double y[], double ydot[]) {
+        cos(y, ydot, t);
+        return 0;
+      }
 
-					bool hasJacobian() const { return cos.hasJacobian(); }
-					int jacobian(const double t, const double y[], double *J[]) {
-						cos.jacobian(y, J, t);
-						return 0;
-					}
+      bool hasJacobian() const { return cos.hasJacobian(); }
+      int jacobian(const double t, const double y[], double *J[]) {
+        cos.jacobian(y, J, t);
+        return 0;
+      }
 
-				public:
-					inline std::vector<double> initial_state() {
-						return cos.initial_state();
-					}
+    public:
+      inline std::vector<double> initial_state() {
+        return cos.initial_state();
+      }
 
-					inline std::vector<std::vector<typename stan::return_type<T1,T2>::type> >
-					decouple_states(const std::vector<std::vector<double> >& y) {
-						return cos.decouple_states(y);
-					}
+      inline std::vector<std::vector<typename stan::return_type<T1,T2>::type> >
+      decouple_states(const std::vector<std::vector<double> >& y) {
+        return cos.decouple_states(y);
+      }
 
-				private:
-					coupled_ode_system<F, T1, T2> cos;
-					std::vector<double> y_t, dy_dt;
-		};
+    private:
+      coupled_ode_system<F, T1, T2> cos;
+      std::vector<double> y_t, dy_dt;
+    };
 
 
     /**
@@ -133,15 +133,15 @@ namespace stan {
       // the coupled system creates the coupled initial state
       std::vector<double> initial_coupled_state = coupled_system.initial_state();
 
-			CVodeIntegrator integrator;
-			integrator.assignOde(coupled_system, t0, initial_coupled_state);
-			integrator.setRelativeTolerance(relative_tolerance);
-			integrator.setAbsoluteTolerance(absolute_tolerance);
+      CVodeIntegrator integrator;
+      integrator.assignOde(coupled_system, t0, initial_coupled_state);
+      integrator.setRelativeTolerance(relative_tolerance);
+      integrator.setAbsoluteTolerance(absolute_tolerance);
 
       for (size_t n = 0; n < ts.size(); n++) {
-				integrator.integrateTo( ts[n] );
-				y_coupled[n] = integrator.currentState();
-			}
+        integrator.integrateTo( ts[n] );
+        y_coupled[n] = integrator.currentState();
+      }
 
       // the coupled system also encapsulates the decoupling operation
       return coupled_system.decouple_states(y_coupled);
