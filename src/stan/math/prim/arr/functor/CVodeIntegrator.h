@@ -100,6 +100,7 @@ CVodeIntegrator::CVodeIntegrator()
 }
 
 CVodeIntegrator::~CVodeIntegrator() {
+  N_VDestroy_Serial(nvCurrentState_);
   CVodeFree( &cvodeMem_ );
 }
 

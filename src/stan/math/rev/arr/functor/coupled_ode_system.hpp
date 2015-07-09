@@ -34,7 +34,7 @@ namespace stan {
         for (size_t m = 0; m < y0.size(); m++)
           y[n][m] += y0[m];
     }
-    
+
     template <typename F>
     class ad_helper {
     public:
@@ -49,9 +49,11 @@ namespace stan {
 
     public:
       void gradient_yt(int i, double t, const std::vector<double> & y, const std::vector<double> & theta, std::vector<double> & grad) {
-        setup(y, theta);
+        clear();
 
         nested_ad ad;
+        setup(y, theta);
+
         std::vector<stan::math::var> dy_dt_temp;
         dy_dt_temp = f_(t, y_temp_, theta_temp_, x_,x_int_,msgs_);
 
@@ -60,9 +62,11 @@ namespace stan {
       }
 
       void gradient_y(int i, double t, const std::vector<double> & y, const std::vector<double> & theta, std::vector<double> & grad) {
-        setup(y);
+        clear();
 
         nested_ad ad;
+        setup(y);
+
         std::vector<stan::math::var> dy_dt_temp;
         dy_dt_temp = f_(t, y_temp_, theta, x_,x_int_,msgs_);
 
@@ -95,11 +99,13 @@ namespace stan {
       }
 
     private:
-      void setup(const std::vector<double> & y, const std::vector<double> & theta) {
+      void clear() {
         vars_.clear();
         y_temp_.clear();
         theta_temp_.clear();
+      }
 
+      void setup(const std::vector<double> & y, const std::vector<double> & theta) {
         for (int j = 0; j < N_; j++) {
           y_temp_.push_back(y[j]);
           vars_.push_back(y_temp_[j]);
@@ -112,9 +118,6 @@ namespace stan {
       }
 
       void setup(const std::vector<double> & y) {
-        vars_.clear();
-        y_temp_.clear();
-
         for (int j = 0; j < N_; j++) {
           y_temp_.push_back(y[j]);
           vars_.push_back(y_temp_[j]);
@@ -244,7 +247,7 @@ namespace stan {
           }
         }
       }
-      
+
 
       bool hasJacobian() const { return true; }
       void jacobian(const double y[], double *J[], double t) {
