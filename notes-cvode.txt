@@ -3,7 +3,25 @@ Installing CVODE:
 make install-cvode
 
 
-WINDOWS
----------
-- if using Rtools, user must specify current directory using the
-  CURDIR variable to make
+Notes for CVODE installation
+------------------------------------
+
+New scheme does not require cmake any more. This has been done in the
+following way:
+
+1. install & configure with cmake the cvode package, this creates a
+sundials_config.h header file which has been dropped into the cvode
+includes
+
+2. build using cmake
+
+3. from the two static libraries created extract with ar t the object
+files which have been compiled into the static library. The output of
+this command is saved into make/libsundials*.txt
+
+4. compilation of the needed c files in the usual way
+
+make install-cvode now uses the simpler make method
+
+make install-cvode-cmake uses the cmake based installation (can be
+configured from the user)
