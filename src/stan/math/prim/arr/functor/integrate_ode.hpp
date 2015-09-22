@@ -124,10 +124,10 @@ namespace stan {
       stan::math::check_ordered("integrate_ode", "times", ts);
       stan::math::check_less("integrate_ode", "initial time", t0, ts[0]);
 
-      //const double absolute_tolerance = 1e-12;
-      //const double relative_tolerance = 1e-9;
-      const double absolute_tolerance = 1e-6;
-      const double relative_tolerance = 1e-6;
+      const double absolute_tolerance = 1e-9;
+      const double relative_tolerance = 1e-9;
+      //const double absolute_tolerance = 1e-6;
+      //const double relative_tolerance = 1e-6;
       CVodeODE<F, T1, T2> coupled_system(f, y0, theta, x, x_int, msgs);
 
       std::vector<std::vector<double> > y_coupled(ts.size());
