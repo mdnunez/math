@@ -1,16 +1,16 @@
-CVODE_SRCDIR ?= lib/cvode-2.8.1
+CVODE_SRCDIR   ?= lib/cvode-2.8.1
 CVODE_BUILDDIR ?= bin/cvode-build
-CVODE_INSTDIR ?= bin/cvode
+CVODE_INSTDIR  ?= bin/cvode
 
 # CFLAGS specific for cvode may be considered here, i.e. -m32 and -m64
-# switches on Windows need to be added for Rtools gcc
+# switches on Windows may possibly need to be added for Rtools gcc
 CVODE_CFLAGS= -O$(O) -DNDEBUG
 # configure a C compiler here
 CVODE_CC = gcc
 
 # needed for compilation of Stan programs
 LDLIBS += -Lbin/cvode/lib -lsundials_cvode  -lsundials_nvecserial
-CFLAGS += -isystem $(CVODE_SRCDIR)/include
+CFLAGS += -isystem $(CVODE_INSTDIR)/include
 
 # cmake options for obsolete cmake based build (this is the
 # pre-configured build used below)
@@ -34,27 +34,27 @@ install-cvode-cmake:
 # the list of needed c-files
 
 # for libsundials_nvecserial.a
-SUNDIALS_NVEC_SERIAL = $(addprefix $(CVODE_SRCDIR)/src/, nvec_ser/nvector_serial.c sundials/sundials_math.c)
-SUNDIALS_NVEC_SERIAL := $(SUNDIALS_NVEC_SERIAL:$(CVODE_SRCDIR)/src/%.c=bin/cvode/%.o)
+SUNDIALS_NVEC_SERIAL  = $(addprefix $(CVODE_SRCDIR)/src/, nvec_ser/nvector_serial.c sundials/sundials_math.c)
+SUNDIALS_NVEC_SERIAL := $(SUNDIALS_NVEC_SERIAL:$(CVODE_SRCDIR)/src/%.c=$(CVODE_INSTDIR)/%.o)
 
 # for libsundials_cvode.a
-SUNDIALS_CVODE = $(addprefix $(CVODE_SRCDIR)/src/cvode/, cvode.c cvode_io.c cvode_direct.c cvode_band.c cvode_dense.c cvode_diag.c cvode_spils.c cvode_spbcgs.c cvode_spgmr.c cvode_sptfqmr.c cvode_sparse.c cvode_bandpre.c cvode_bbdpre.c)
+SUNDIALS_CVODE  = $(addprefix $(CVODE_SRCDIR)/src/cvode/, cvode.c cvode_io.c cvode_direct.c cvode_band.c cvode_dense.c cvode_diag.c cvode_spils.c cvode_spbcgs.c cvode_spgmr.c cvode_sptfqmr.c cvode_sparse.c cvode_bandpre.c cvode_bbdpre.c)
 SUNDIALS_CVODE += $(addprefix $(CVODE_SRCDIR)/src/sundials/, sundials_nvector.c sundials_math.c sundials_direct.c sundials_band.c sundials_dense.c sundials_iterative.c sundials_sparse.c sundials_spbcgs.c sundials_spgmr.c sundials_sptfqmr.c)
-SUNDIALS_CVODE := $(SUNDIALS_CVODE:$(CVODE_SRCDIR)/src/%.c=bin/cvode/%.o)
+SUNDIALS_CVODE := $(SUNDIALS_CVODE:$(CVODE_SRCDIR)/src/%.c=$(CVODE_INSTDIR)/%.o)
 
-bin/cvode/lib/libsundials_nvecserial.a : $(SUNDIALS_NVEC_SERIAL)
+$(CVODE_INSTDIR)/lib/libsundials_nvecserial.a : $(SUNDIALS_NVEC_SERIAL)
 	@mkdir -p $(dir $@)
-	$(AR) -rs bin/cvode/lib/libsundials_nvecserial.a $(SUNDIALS_NVEC_SERIAL)
+	$(AR) -rs $(CVODE_INSTDIR)/lib/libsundials_nvecserial.a $(SUNDIALS_NVEC_SERIAL)
 
-bin/cvode/lib/libsundials_cvode.a : $(SUNDIALS_CVODE)
+$(CVODE_INSTDIR)/lib/libsundials_cvode.a : $(SUNDIALS_CVODE)
 	@mkdir -p $(dir $@)
-	$(AR) -rs bin/cvode/lib/libsundials_cvode.a $(SUNDIALS_CVODE)
+	$(AR) -rs $(CVODE_INSTDIR)/lib/libsundials_cvode.a $(SUNDIALS_CVODE)
 
-$(sort $(SUNDIALS_CVODE) $(SUNDIALS_NVEC_SERIAL) ) : bin/cvode/%.o : $(CVODE_SRCDIR)/src/%.c
+$(sort $(SUNDIALS_CVODE) $(SUNDIALS_NVEC_SERIAL) ) : $(CVODE_INSTDIR)/%.o : $(CVODE_SRCDIR)/src/%.c
 	@mkdir -p $(dir $@)
 	$(CVODE_CC) -c $(CVODE_CFLAGS) -I $(CVODE_SRCDIR)/include $< -o $@
 
-install-cvode: bin/cvode/lib/libsundials_nvecserial.a bin/cvode/lib/libsundials_cvode.a
+install-cvode: $(CVODE_INSTDIR)/lib/libsundials_nvecserial.a $(CVODE_INSTDIR)/lib/libsundials_cvode.a
 	cp -r $(CVODE_SRCDIR)/include $(CVODE_INSTDIR)
 
 # for debugging purposes, i.e. call make print-VARIABLE to see it
