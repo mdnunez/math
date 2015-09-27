@@ -4,9 +4,11 @@ CVODE_INSTDIR  ?= bin/cvode
 
 # CFLAGS specific for cvode may be considered here, i.e. -m32 and -m64
 # switches on Windows may possibly need to be added for Rtools gcc
+# note: the CVODE_CFLAGS & CVODE_CC are only used for the non-standard
+# cmake install
 CVODE_CFLAGS= -O$(O) -DNDEBUG
 # configure a C compiler here
-CVODE_CC = gcc
+CVODE_CC = $(CC) -x c
 
 # needed for compilation of Stan programs
 LDLIBS += -Lbin/cvode/lib -lsundials_cvode  -lsundials_nvecserial
@@ -52,7 +54,7 @@ $(CVODE_INSTDIR)/lib/libsundials_cvode.a : $(SUNDIALS_CVODE)
 
 $(sort $(SUNDIALS_CVODE) $(SUNDIALS_NVEC_SERIAL) ) : $(CVODE_INSTDIR)/%.o : $(CVODE_SRCDIR)/src/%.c
 	@mkdir -p $(dir $@)
-	$(CVODE_CC) -c $(CVODE_CFLAGS) -I $(CVODE_SRCDIR)/include $< -o $@
+	$(COMPILE.c) -x c -I $(CVODE_SRCDIR)/include $< -o $@
 
 install-cvode: $(CVODE_INSTDIR)/lib/libsundials_nvecserial.a $(CVODE_INSTDIR)/lib/libsundials_cvode.a
 	cp -r $(CVODE_SRCDIR)/include $(CVODE_INSTDIR)
