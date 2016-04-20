@@ -71,9 +71,9 @@ namespace stan {
                typename T_y, typename T_alpha, typename T_tau,
                typename T_beta, typename T_delta, typename T_eta>
      typename return_type<T_y, T_alpha, T_tau, T_beta, T_delta, T_eta>::type
-     wiener_log(const T_y& y, const T_alpha& alpha, const T_tau& tau,
+     ratcliff_log(const T_y& y, const T_alpha& alpha, const T_tau& tau,
        const T_beta& beta, const T_delta& delta, const T_eta& eta) {
-      static const char* function("stan::math::wiener_log(%1%)");
+      static const char* function("stan::math::ratcliff_log(%1%)");
 
       using boost::math::tools::promote_args;
       using boost::math::isinf;
